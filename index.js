@@ -117,7 +117,7 @@ export default class extends PureComponent {
       ...otherProps
     } = this.props;
 
-    const kavProps = Object.assign({ behavior: isIOS ? 'padding' : null }, keyboardAvoidingViewProps);
+    const kavProps = Object.assign({ behavior: isIOS ? 'padding' : null, flex: 1 }, keyboardAvoidingViewProps);
 
     const {
       measureInputVisible,
