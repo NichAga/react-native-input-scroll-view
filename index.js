@@ -64,7 +64,6 @@ if (isIOS) {
 
 export default class extends PureComponent {
   static propTypes = {
-    topOffset: PropTypes.number,
     keyboardOffset: PropTypes.number,
     multilineInputStyle: PropTypes.oneOfType([
       PropTypes.object,
@@ -77,7 +76,6 @@ export default class extends PureComponent {
   };
 
   static defaultProps = {
-    topOffset: 0,
     keyboardOffset: 40,
     multilineInputStyle: null,
     useAnimatedScrollView: false,
@@ -98,7 +96,7 @@ export default class extends PureComponent {
     this._measureCallback = null;
     this._keyboardShow = false;
     this._inputInfoMap = {};
-    this._topOffset = this.props.topOffset;
+    this._topOffset = 0;
 
     this._addListener();
     this._extendScrollViewFunc();
@@ -110,7 +108,6 @@ export default class extends PureComponent {
 
   render() {
     const {
-      topOffset,
       keyboardOffset,
       multilineInputStyle,
       useAnimatedScrollView,
@@ -137,7 +134,8 @@ export default class extends PureComponent {
         <View style={styles.wrap}>
           <ScrollComponent ref={this._onRef}
                            onFocus={this._onFocus}
-                           onBlur={this._onBlur} {...otherProps}
+                           onBlur={this._onBlur}
+                           onLayout={this._onLayout} {...otherProps}
                            // fix missing TextInput missing focus
                            keyboardShouldPersistTaps='handled'>
             <View onStartShouldSetResponderCapture={isIOS ? this._onTouchStart : null}>
@@ -272,19 +270,17 @@ export default class extends PureComponent {
     if (useAnimatedScrollView && this._root._component) {
       this._root = this._root._component;
     }
+  };
 
-    const getTopOffset = () => {
-      this.props.topOffset === undefined &&
-      this._root._innerViewRef &&
-      this._root._innerViewRef.measureInWindow((x, y) => {
+  _onLayout = () => {
+    this._calculateTopOffset();
+  }
+
+  _calculateTopOffset = () => {
+    this._root.measureInWindow((x, y) => {
         if (y > 0) this._topOffset = y;
       });
-    };
-
-    setTimeout(getTopOffset);
-    // 如果屏幕是带动画进入，那么初次获取的位置偏移量并不准确
-    // 这时最好通过 topOffset 属性来手动设定 topBar 的偏移量
-  };
+  }
 
   _scrollToKeyboardRequest = () => {
     if (!this._keyboardShow && !this.props.supportHardwareKeyboard) return;
